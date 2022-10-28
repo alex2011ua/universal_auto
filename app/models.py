@@ -48,6 +48,7 @@ class UklonPaymentsOrder(models.Model):
     bonuses = models.DecimalField(decimal_places=2, max_digits=10)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     def driver_id(self):
         return self.signal
 
@@ -225,6 +226,7 @@ class Driver(models.Model):
     def __str__(self) -> str:
         return f'{self.full_name}'
 
+
 class Fleet(PolymorphicModel):
     name = models.CharField(unique=True, max_length=255)
     fees = models.DecimalField(decimal_places=2, max_digits=3, default=0)
@@ -235,17 +237,28 @@ class Fleet(PolymorphicModel):
     def __str__(self) -> str:
         return f'{self.name}'
 
+
 class UberFleet(Fleet):
     def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
-       return Uber.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
+        return Uber.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
+
+    def download_daily_report(self, day_number=None, driver=True, sleep=5, headless=True):
+        return Uber.download_daly_report(day_number=day_number, driver=driver, sleep=sleep, headless=headless)
+
 
 class BoltFleet(Fleet):
     def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
         return Bolt.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
+    def download_daily_report(self, day_number=None, driver=True, sleep=5, headless=True):
+        return Bolt.download_daly_report(day_number=day_number, driver=driver, sleep=sleep, headless=headless)
+
 
 class UklonFleet(Fleet):
     def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
         return Uklon.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
+
+    def download_daily_report(self, day_number=None, driver=True, sleep=5, headless=True):
+        return Uklon.download_daly_report(day_number=day_number, driver=driver, sleep=sleep, headless=headless)
 
 
 class Vehicle(models.Model):
@@ -507,14 +520,19 @@ from app.models import Fleet
 
 
 class SeleniumTools():
-    def __init__(self, session, week_number=None):
+    def __init__(self, session, week_number=None, day=None):
         self.session_file_name = session
         logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
-        if(week_number):
+        if week_number:
             self.current_date = pendulum.parse(week_number, tz="Europe/Kiev")
+            self.type_report = "week"
+        elif day:
+            self.current_date = pendulum.parse(day, tz="Europe/Kiev")
+            self.type_report = "day"
         else:
             self.current_date = pendulum.now().start_of('week').subtract(days=3)
+            self.type_report = "week"
     
     def report_file_name(self, patern):
         filenames = os.listdir(os.curdir)
@@ -524,6 +542,12 @@ class SeleniumTools():
 
     def week_number(self):
         return f'{int(self.start_of_week().strftime("%W"))}'
+
+    def start_of_day(self):
+        return self.current_date.start_of("day")
+
+    def end_of_day(self):
+        return self.current_date.end_of("day")
 
     def start_of_week(self):
         return self.current_date.start_of('week')
@@ -578,8 +602,8 @@ class SeleniumTools():
         return driver
 
 class Uber(SeleniumTools):    
-    def __init__(self, week_number=None, driver=True, sleep=3, headless=False, base_url="https://supplier.uber.com"):
-        super().__init__('uber', week_number=week_number)
+    def __init__(self, week_number=None, driver=True, sleep=3, headless=False, day=None, base_url="https://supplier.uber.com"):
+        super().__init__('uber', week_number=week_number, day=day)
         self.sleep = sleep
         print(driver)
         if driver:
@@ -774,6 +798,15 @@ class Uber(SeleniumTools):
             u.quit()
         return u.save_report()
 
+    @staticmethod
+    def download_daily_report(day=None, driver=True, sleep=5, headless=True):
+        u = Uber(week_number=week_number, driver=False, sleep=0, headless=headless, day=day)
+        if u.payments_order_file_name() not in os.listdir(os.curdir):
+            u = Uber(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
+            u.login_v2()
+            u.download_payments_order()
+            u.quit()
+        return u.save_report()
 
 class Bolt(SeleniumTools):    
     def __init__(self, week_number=None, driver=True, sleep=3, headless=False, base_url="https://fleets.bolt.eu"):
@@ -807,7 +840,6 @@ class Bolt(SeleniumTools):
     def payments_order_file_name(self):
         return self.report_file_name(self.file_patern())
 
-    
     def save_report(self):
         if self.sleep:
             time.sleep(self.sleep)
@@ -856,8 +888,8 @@ class Bolt(SeleniumTools):
 
 
 class Uklon(SeleniumTools):    
-    def __init__(self, week_number=None, driver=True, sleep=3, headless=False, base_url="https://partner.uklon.com.ua"):
-        super().__init__('uklon', week_number=week_number)
+    def __init__(self, week_number=None, driver=True, sleep=3, headless=False, day=None, base_url="https://partner.uklon.com.ua"):
+        super().__init__('uklon', week_number=week_number, day=day)
         self.sleep = sleep
         if driver:
             self.driver = self.build_driver(headless)
@@ -875,7 +907,14 @@ class Uklon(SeleniumTools):
             time.sleep(self.sleep)
 
     def download_payments_order(self):
-        url = f"{self.base_url}/partner/export/fares?page=1&pageSize=20&startDate={self.start_of_week_timestamp()}&endDate={self.end_of_week_timestamp()}&format=csv"
+        if self.type_report == "week":
+            url = f"{self.base_url}/partner/export/fares?page=1&pageSize=20&" \
+                  f"startDate={self.start_of_week_timestamp()}&" \
+                  f"endDate={self.end_of_week_timestamp()}&format=csv"
+        elif self.type_report == "day":
+            url = f"{self.base_url}/partner/export/fares?page=1&pageSize=20&" \
+                  f"startDate={self.start_of_day_timestamp()}&" \
+                  f"endDate={self.end_of_day_timestamp()}&format=csv"
         self.driver.get(url)
 
     def save_report(self):
@@ -906,7 +945,13 @@ class Uklon(SeleniumTools):
                 items.append(order)
 
         return items
-    
+
+    def start_of_day_timestamp(self):
+        return round(self.start_of_day().timestamp())
+
+    def end_of_day_timestamp(self):
+        return round(self.end_of_day().timestamp())
+
     def start_of_week_timestamp(self):
         return round(self.start_of_week().timestamp())
 
@@ -931,6 +976,21 @@ class Uklon(SeleniumTools):
             u.login()
             u.download_payments_order()
         return u.save_report()
+    # todo: we can combine two this methods...
+    @staticmethod
+    def download_daily_report(day=None, driver=True, sleep=5, headless=True):
+        u = Uklon(day=day, driver=False, sleep=0, headless=headless)
+        if u.payments_order_file_name() not in os.listdir(os.curdir):
+            u = Uklon(day=day, driver=driver, sleep=sleep, headless=headless)
+            u.login()
+            u.download_payments_order()
+        return u.save_report()
+
+def download_and_save_daily_report(day=None, driver=True, sleep=5, headless=True):
+    fleets = Fleet.objects.filter(deleted_at=None)
+    for fleet in fleets:
+        fleet.download_daily_report(day=day, driver=driver, sleep=sleep, headless=headless)
+
 
 def get_report(week_number = None, driver=True, sleep=5, headless=True):
     owner =   {"Fleet Owner": 0}
