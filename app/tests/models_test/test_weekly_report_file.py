@@ -1,8 +1,9 @@
-# from django.test import TestCase
 import pytest
 from app.models import WeeklyReportFile
 
 wrf = WeeklyReportFile()
+
+
 @pytest.mark.django_db
 def test_weekly_report_file_create():
     weekly_report_file = WeeklyReportFile.objects.create(

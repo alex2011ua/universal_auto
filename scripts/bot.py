@@ -80,10 +80,12 @@ def code(update: Update, context: CallbackContext):
     # else:
     #     aut_handler(update, context)
 
+
 def save_reports(update, context):
     wrf = WeeklyReportFile()
     wrf.save_weekly_reports_to_db()
     update.message.reply_text("Reports have been saved")
+
 
 def error_handler(update: object, context: CallbackContext) -> None:
     """Log the error and send a telegram message to notify the developer."""
@@ -110,8 +112,10 @@ def error_handler(update: object, context: CallbackContext) -> None:
     # Finally, send the message
     context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message, parse_mode=ParseMode.HTML)
 
+
 def get_owner_today_report(update, context) -> str:
     pass
+
 
 def get_driver_today_report(update, context) -> str:
     driver_first_name = Users.objects.filter(user_id = {update.message.chat.id})
@@ -121,8 +125,10 @@ def get_driver_today_report(update, context) -> str:
         update.message.reply_text(f'Hi {update.message.chat.username} driver')
         update.message.reply_text(text = data)
 
+
 def get_driver_week_report(update, context) -> str:
     pass
+
 
 def choice_driver_option(update, context) -> list:
         update.message.reply_text(f'Hi {update.message.chat.username} driver')
@@ -130,12 +136,14 @@ def choice_driver_option(update, context) -> list:
         context.bot.send_message(chat_id=update.effective_chat.id, text='choice option',
         reply_markup=ReplyKeyboardMarkup(buttons))
 
+
 def get_manager_today_report(update, context) -> str:
     if user.type == 1:
         data = PaymentsOrder.objects.filter(transaction_time = date.today())
-        update.message.reply_text(text = data)
+        update.message.reply_text(text=data)
     else:
         error_handler()
+
 
 def get_stat_for_manager(update, context) -> list:
         update.message.reply_text(f'Hi {update.message.chat.username} manager')
@@ -152,6 +160,7 @@ def drivers_rating(context):
             text += f"{period['start']:%d.%m.%Y} - {period['end']:%d.%m.%Y}" + '\n'
             text += '\n'.join([f"{item['num']} {item['driver']} {item['trips'] if item['trips']>0 else ''}" for item in period['rating']]) + '\n\n'
 
+
 def get_number(update, context):
     chat_id = update.message.chat.id
     user = User.get_by_chat_id(chat_id)
@@ -160,6 +169,7 @@ def get_number(update, context):
         custom_user = User(email="null", phone_number=phone_number, chat_id=chat_id)
         custom_user.save()
         update.message.reply_text("Enter your email:")
+
 
 def aut_handler(update, context) -> list:
     if 'Get autorizate' in update.message.text:
@@ -171,6 +181,7 @@ def aut_handler(update, context) -> list:
             get_stat_for_manager(update, context)
         else:
             get_number()
+
 
 def get_update_report(update, context):
     user = User.get_by_chat_id(chat_id)
@@ -186,6 +197,35 @@ def get_update_report(update, context):
         update.message.reply_text("Enter you Uber OTP code from SMS:")
         uber.run()
         aut_handler(update, context)
+def location(update: Update, context: CallbackContext):
+    user = update.effective_user
+    msg_type = 0
+    current_pos = (update.message.location.latitude, update.message.location.longitude)
+    # phone_number = update.message.contact.phone_number
+    context.bot.send_message(user.id, current_pos)
+    # context.bot.send_message(user.id, phone_number)
+    if update.edited_message:
+        message = update.edited_message
+    else:
+        message = update.message
+
+    if message["edit_date"] is not None:
+        msg_type += 1
+    if message["location"]["live_period"] is not None:
+        msg_type += 1 << 1
+
+    if msg_type == 0:
+        context.bot.send_message(user.id, "Single (non-live) location update.")
+    elif msg_type == 1:
+        context.bot.send_message(user.id, "End of live period.")
+    elif msg_type == 2:
+        context.bot.send_message(user.id, "Start of live period")
+    elif msg_type == 3:
+        context.bot.send_message(user.id, "Live location update.")
+
+def location1(update,context):
+    location(update, context)
+
 
 def start(update, context):
     update.message.reply_text('Hi!')
@@ -204,13 +244,39 @@ def start(update, context):
     else:
         update.message.reply_text("Please give your number to start bot", reply_markup=reply_markup, )
 
+
 def report(update, context):
     update.message.reply_text("Enter you Uber OTP code from SMS:")
     update.message.reply_text(get_report())
-    
-def get_help(update, context)-> str:
+
+
+def get_help(update, context) -> str:
     update.message.reply_text('''For first step make registration by, or autorizate by /start command, if already registered.
     after all you can update your report, or pull statistic for choice''')
+
+
+def status(update, context):
+    buttons = [[KeyboardButton('Free')], [KeyboardButton('With client')], [KeyboardButton('Waiting for a client')], [KeyboardButton('Offline')]]
+
+    context.bot.send_message(chat_id=update.effective_chat.id, text='Choice your status',
+                             reply_markup=ReplyKeyboardMarkup(buttons, one_time_keyboard=True))
+
+
+def get_status_driver_and_change(update, context):
+    status = update.message.text
+    chat_id = update.message.chat.id
+    Driver.get_by_chat_id(chat_id=chat_id)
+    if driver.role == 'Driver':
+        driver[driver_status] = status
+        driver.save()
+        update.message.reply_text('Your status has been changed')
+    else:
+        try:
+            driver = Driver.objects.get(driver_status=status)
+            return update.message.reply_text(driver)
+        except Driver.DoesNotExist:
+            return update.message.reply_text('There are currently no drivers with this status')
+
 
 def main():
     updater = Updater(os.environ['TELEGRAM_TOKEN'], use_context=True)
@@ -219,12 +285,17 @@ def main():
     dp.add_handler(CommandHandler("start",  start))
     dp.add_handler(CommandHandler("report", report, run_async=True))
     dp.add_handler(CommandHandler('update', update_db, run_async=True))
+    dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("save_reports", save_reports))
     dp.add_handler(MessageHandler(Filters.text, code))
     dp.add_handler(MessageHandler(Filters.text('Get all today statistic'), get_manager_today_report))
     dp.add_handler(MessageHandler(Filters.text('Get today statistic'), get_driver_today_report))
     dp.add_handler(MessageHandler(Filters.text('Choice week number'), get_driver_week_report))
     dp.add_handler(MessageHandler(Filters.text('Update report'), get_update_report))
+    dp.add_handler(MessageHandler(Filters.text('Free'), get_status_driver_and_change))
+    dp.add_handler(MessageHandler(Filters.text('With client'), get_status_driver_and_change))
+    dp.add_handler(MessageHandler(Filters.text('Waiting for a client'), get_status_driver_and_change))
+    dp.add_handler(MessageHandler(Filters.text('Offline'), get_status_driver_and_change))
     dp.add_handler(MessageHandler(Filters.contact, get_number))
     dp.add_error_handler(error_handler)
     updater.job_queue.run_daily(drivers_rating, time=datetime.time(6, 0, 0), days=(0,))

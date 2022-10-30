@@ -37,3 +37,33 @@ class TestBot(unittest.TestCase):
 
     def test_update_db_2(self):
         self.assertIsNotNone('/update_db')
+
+    def test_status(self):
+        self.assertTrue('/status')
+
+    def test_status(self):
+        self.assertIsNotNone('/status')
+
+    def test_update_driver_status_1(self):
+        self.assertIsNotNone('Free')
+
+    def test_update_driver_status_2(self):
+        self.assertIsNotNone('Free')
+
+    def test_update_driver_status_3(self):
+        self.assertIsNotNone('With client')
+
+    def test_update_driver_status_4(self):
+        self.assertIsNotNone('With client')
+
+    def test_update_driver_status_5(self):
+        self.assertIsNotNone('Waiting for a client')
+
+    def test_update_driver_status_6(self):
+        self.assertIsNotNone('Waiting for a client')
+
+    def test_update_driver_status_7(self):
+        self.assertIsNotNone('Offline')
+
+    def test_update_driver_status_8(self):
+        self.assertIsNotNone('Offline')

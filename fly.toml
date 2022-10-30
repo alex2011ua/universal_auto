@@ -7,10 +7,25 @@ processes = []
 
 [env]
   PORT = "8080"
+  ECHO_PORT = "44300"
 
 [experimental]
   allowed_public_ports = []
   auto_rollback = true
+
+[[services]]
+  internal_port = 44300
+  protocol = "udp"
+
+  [[services.ports]]
+    port = "44300"
+
+[[services]]
+  internal_port = 44300
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = "44300"
 
 [[services]]
   http_checks = []

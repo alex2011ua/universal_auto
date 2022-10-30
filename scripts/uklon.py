@@ -1,3 +1,6 @@
+from app.models import Uklon
+
+
 def run():
     b = Uklon(driver=True, sleep=3, headless=True)
     b.login()

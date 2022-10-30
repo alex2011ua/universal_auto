@@ -1,8 +1,9 @@
 import datetime
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from django.views.generic import TemplateView
-
 from scripts.driversrating import DriversRatingMixin
+
 
 
 class DriversRatingView(DriversRatingMixin, TemplateView):
@@ -20,3 +21,11 @@ class DriversRatingView(DriversRatingMixin, TemplateView):
             end = None
         context['rating'] = self.get_rating(start, end)
         return context
+
+
+class GpsData(APIView):
+    def get(self, request, format=None):
+        return Response('OK')
+
+    def post(self, request):
+        return Response('OK')

@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 
 from app.views import DriversRatingView
+from app.views import GpsData
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rating/', DriversRatingView.as_view()),
+    path('gps/data', GpsData.as_view()),
     path('fake_uklon/', include('fake_uklon.urls')),
 ]
