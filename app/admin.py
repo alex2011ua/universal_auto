@@ -25,18 +25,23 @@ class UklonFleetAdmin(FleetChildAdmin):
     base_model = UklonFleet
     show_in_index = False
 
+@admin.register(NewUklonFleet)
+class UklonFleetAdmin(FleetChildAdmin):
+    base_model = NewUklonFleet
+    show_in_index = False
+
 
 @admin.register(Fleet)
 class FleetParentAdmin(PolymorphicParentModelAdmin):
     base_model = Fleet 
-    child_models = (UberFleet, BoltFleet, UklonFleet,)
+    child_models = (UberFleet, BoltFleet, UklonFleet, NewUklonFleet)
     list_filter = (PolymorphicChildModelFilter,)
     
 
 admin.site.register(User)
 admin.site.register(Driver)
 admin.site.register(Client)
-admin.site.register(Partner)
+#admin.site.register(Partner)
 admin.site.register(DriverManager)
 admin.site.register(ServiceStationManager)
 admin.site.register(SupportManager)
