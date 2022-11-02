@@ -347,7 +347,7 @@ class BoltFleet(Fleet):
     def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
         return Bolt.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
     def download_daily_report(self, day=None, driver=True, sleep=5, headless=True):
-        return Bolt.download_daily_report(dayr=day, driver=driver, sleep=sleep, headless=headless)
+        return Bolt.download_weekly_report(day=day, driver=driver, sleep=sleep, headless=headless)
 
 
 
@@ -355,14 +355,13 @@ class UklonFleet(Fleet):
     def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
         return Uklon.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
 
-class NewUklonFleet(Fleet):
-    def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
-        return NewUklon.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
-
-
     def download_daily_report(self, day=None, driver=True, sleep=5, headless=True):
         # the same method as weekly report
         return Uklon.download_weekly_report(day=day, driver=driver, sleep=sleep, headless=headless)
+
+class NewUklonFleet(Fleet):
+    def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
+        return NewUklon.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
 
 
 class Vehicle(models.Model):
@@ -938,7 +937,7 @@ class Bolt(SeleniumTools):
 
     def download_payments_order(self):
         if self.day:
-            self.driver.get(f"{self.base_url}/company/58225/reports/dayly/{self.file_patern()}") # todo
+            self.driver.get(f"{self.base_url}/company/58225/reports/dayly/{self.day.format('DD%2eMM%2eYYYY')}")
         else:
             self.driver.get(f"{self.base_url}/company/58225/reports/weekly/{self.file_patern()}")
     
@@ -988,7 +987,7 @@ class Bolt(SeleniumTools):
         return items
 
     @staticmethod
-    def download_weekly_report(week_number=None, day = None,  driver=True, sleep=5, headless=True):
+    def download_weekly_report(week_number=None, day=None,  driver=True, sleep=5, headless=True):
         """
                 Can save weekly and daily report
         """
