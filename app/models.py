@@ -363,6 +363,9 @@ class NewUklonFleet(Fleet):
     def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
         return NewUklon.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
 
+    def download_daily_report(self, day=None, driver=True, sleep=5, headless=True):
+        return NewUklon.download_daily_report(day=day, driver=driver, sleep=sleep, headless=headless)
+
 
 class Vehicle(models.Model):
     name = models.CharField(max_length=255)
@@ -1120,8 +1123,8 @@ class Uklon(SeleniumTools):
         pass
 
 class NewUklon(SeleniumTools):
-    def __init__(self, week_number=None, driver=True, sleep=3, headless=False, base_url="https://fleets.uklon.com.ua"):
-        super().__init__('nuklon', week_number=week_number)
+    def __init__(self, week_number=None, day=None, driver=True, sleep=3, headless=False, base_url="https://fleets.uklon.com.ua"):
+        super().__init__('nuklon', week_number=week_number, day=day)
         self.sleep = sleep
         if driver:
             self.driver = self.build_driver(headless)
@@ -1167,6 +1170,22 @@ class NewUklon(SeleniumTools):
         self.driver.find_element(By.XPATH, '//span[text()="Експорт CSV"]').click()
         self.driver.get_screenshot_as_file(f'new_uklon8.png')
 
+    def download_payments_day_order(self):
+        url = f'{self.base_url}/workspace/orders'
+        self.driver.get(url)
+        if self.sleep:
+            time.sleep(self.sleep)
+
+        self.driver.find_element(By.XPATH, '//upf-order-report-list-filters/form/mat-form-field[1]').click()
+        self.driver.get_screenshot_as_file(f'new_uklon6.png')
+        self.driver.find_element(By.XPATH, '//mat-option/span/div[text()=" Вибрати період "]').click()
+        e = self.driver.find_element(By.XPATH, '//input')
+        self.driver.find_element(By.XPATH, '//span[text()= " Застосувати "]').click()
+        e.send_keys(self.day.format("DD.MM.YYYY") + Keys.TAB + self.day.format("DD.MM.YYYY"))
+        self.driver.get_screenshot_as_file(f'new_uklon7.png')
+        self.driver.find_element(By.XPATH, '//span[text()="Експорт CSV"]').click()
+        self.driver.get_screenshot_as_file(f'new_uklon8.png')
+
 
     def save_report(self):
         if self.sleep:
@@ -1204,6 +1223,11 @@ class NewUklon(SeleniumTools):
 
         return items
 
+    def start_of_day(self):
+        return self.day.start_of("day")
+
+    def end_of_day(self):
+        return self.day.end_of("day")
     def start_of_week_timestamp(self):
         return round(self.start_of_week().timestamp())
 
@@ -1214,8 +1238,12 @@ class NewUklon(SeleniumTools):
         return self.report_file_name(self.file_patern())
 
     def file_patern(self):
-        start = self.start_of_week()
-        end = self.end_of_week().end_of('day')
+        if self.day:
+            start = self.start_of_day()
+            end = self.end_of_day()
+        else:
+            start = self.start_of_week()
+            end = self.end_of_week().end_of('day')
         sd, sy, sm = start.strftime("%d"), start.strftime("%y"), start.strftime("%m")
         ed, ey, em = end.strftime("%d"), end.strftime("%y"), end.strftime("%m")
         return f'00.00.{sd}.{sm}.{sy}.+23.59.{ed}.{em}.{ey}'
@@ -1229,6 +1257,14 @@ class NewUklon(SeleniumTools):
             u.download_payments_order()
         return u.save_report()
 
+    @staticmethod
+    def download_daily_report(day=None, driver=True, sleep=5, headless=True):
+        u = NewUklon(day=day, driver=False, sleep=0, headless=headless)
+        if u.payments_order_file_name() not in os.listdir(os.curdir):
+            u = NewUklon(day=day, driver=driver, sleep=sleep, headless=headless)
+            u.login()
+            u.download_payments_day_order()
+        return u.save_report()
     def status(self):
         pass
 
