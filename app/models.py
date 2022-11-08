@@ -612,6 +612,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import ActionChains
 
 import time
 import csv
@@ -1171,20 +1172,23 @@ class NewUklon(SeleniumTools):
         self.driver.get_screenshot_as_file(f'new_uklon8.png')
 
     def download_payments_day_order(self):
+        actions = ActionChains(self.driver)
+        actions.move_by_offset(500, 500).perform()
+        if self.sleep:
+            time.sleep(self.sleep)
         url = f'{self.base_url}/workspace/orders'
         self.driver.get(url)
         if self.sleep:
             time.sleep(self.sleep)
-
         self.driver.find_element(By.XPATH, '//upf-order-report-list-filters/form/mat-form-field[1]').click()
-        self.driver.get_screenshot_as_file(f'new_uklon6.png')
         self.driver.find_element(By.XPATH, '//mat-option/span/div[text()=" Вибрати період "]').click()
         e = self.driver.find_element(By.XPATH, '//input')
+        e.send_keys(self.day.format("YYYY.MM.DD") + Keys.TAB + self.day.format("YYYY.MM.DD"))
         self.driver.find_element(By.XPATH, '//span[text()= " Застосувати "]').click()
-        e.send_keys(self.day.format("DD.MM.YYYY") + Keys.TAB + self.day.format("DD.MM.YYYY"))
-        self.driver.get_screenshot_as_file(f'new_uklon7.png')
+        if self.sleep:
+            time.sleep(self.sleep)
+        actions.click().perform()
         self.driver.find_element(By.XPATH, '//span[text()="Експорт CSV"]').click()
-        self.driver.get_screenshot_as_file(f'new_uklon8.png')
 
 
     def save_report(self):
@@ -1298,3 +1302,4 @@ def download_and_save_daily_report(driver=True, sleep=5, headless=True, day=None
     fleets = Fleet.objects.filter(deleted_at=None)
     for fleet in fleets:
         fleet.download_daily_report(day=day, driver=driver, sleep=sleep, headless=headless)
+
