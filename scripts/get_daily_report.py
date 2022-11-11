@@ -4,7 +4,7 @@ import pendulum
 
 def run(*args):
     if args:
-        day = f"{args[0]}"  # todo: get input day
+        day = f"{args[0]}"
     else:
         day = pendulum.now().start_of('day').subtract(days=1)  # yesterday
 

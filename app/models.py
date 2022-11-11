@@ -339,16 +339,15 @@ class UberFleet(Fleet):
         return Uber.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
 
     def download_daily_report(self, day=None, driver=True, sleep=5, headless=True):
-        return Uber.download_daily_report(day=day, driver=driver, sleep=sleep, headless=headless)
-
+        pass
 
 
 class BoltFleet(Fleet):
     def download_weekly_report(self, week_number=None, driver=True, sleep=5, headless=True):
         return Bolt.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
     def download_daily_report(self, day=None, driver=True, sleep=5, headless=True):
+        """the same method as weekly report. it gets daily report if day is non None"""
         return Bolt.download_weekly_report(day=day, driver=driver, sleep=sleep, headless=headless)
-
 
 
 class UklonFleet(Fleet):
@@ -356,7 +355,7 @@ class UklonFleet(Fleet):
         return Uklon.download_weekly_report(week_number=week_number, driver=driver, sleep=sleep, headless=headless)
 
     def download_daily_report(self, day=None, driver=True, sleep=5, headless=True):
-        # the same method as weekly report
+        """the same method as weekly report. it gets daily report if day is non None"""
         return Uklon.download_weekly_report(day=day, driver=driver, sleep=sleep, headless=headless)
 
 class NewUklonFleet(Fleet):
@@ -671,6 +670,12 @@ class SeleniumTools():
     def end_of_week(self):
         return self.current_date.end_of('week')
 
+    def start_of_day(self):
+        return self.day.start_of("day")
+
+    def end_of_day(self):
+        return self.day.end_of("day")
+
     def remove_session(self):
         os.remove(self.session_file_name)
     
@@ -764,12 +769,26 @@ class Uber(SeleniumTools):
             xpath = '//ul/li/div[text()[contains(.,"Payments driver")]]'
             WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.XPATH, xpath)))
             self.driver.find_element(By.XPATH, xpath).click()
-        start = self.driver.find_element(By.XPATH, '(//input[@aria-describedby="datepicker--screenreader--message--input"])[1]')
-        start.send_keys(Keys.NULL)
-        self.driver.find_element(By.XPATH, f'//div[@aria-roledescription="button"]/div[text()={self.start_of_week().strftime("%-d")}]').click()
-        end = self.driver.find_element(By.XPATH, '(//input[@aria-describedby="datepicker--screenreader--message--input"])[2]')
-        end.send_keys(Keys.NULL)
-        self.driver.find_element(By.XPATH, f'//div[@aria-roledescription="button"]/div[text()="{self.end_of_week().strftime("%-d")}"]').click()
+        if self.day:
+            start = self.driver.find_element(By.XPATH,'(//input[@aria-describedby="datepicker--screenreader--message--input"])[1]')
+            start.send_keys(Keys.NULL)
+            date_by_def = pendulum.now().start_of('week').subtract(days=7)
+            if date_by_def.month - self.day.month == -1:  # if month of day is different from month of last week Monday
+                self.driver.find_element(By.XPATH, f'//button[@aria-label="Next month."]').click()
+            elif date_by_def.month - self.day.month > 0:
+                for _ in range(date_by_def.month - self.day.month):
+                    self.driver.find_element(By.XPATH, f'//button[@aria-label="Previous month."]').click()
+            self.driver.find_element(By.XPATH, f'//div[@aria-roledescription="button"]/div[text()={self.day.strftime("%-d")}]').click()
+            end = self.driver.find_element(By.XPATH,'(//input[@aria-describedby="datepicker--screenreader--message--input"])[2]')
+            end.send_keys(Keys.NULL)
+            self.driver.find_element(By.XPATH,f'//div[@aria-roledescription="button"]/div[text()="{self.day.strftime("%-d")}"]').click()
+        else:
+            start = self.driver.find_element(By.XPATH, '(//input[@aria-describedby="datepicker--screenreader--message--input"])[1]')
+            start.send_keys(Keys.NULL)
+            self.driver.find_element(By.XPATH, f'//div[@aria-roledescription="button"]/div[text()={self.start_of_week().strftime("%-d")}]').click()
+            end = self.driver.find_element(By.XPATH, '(//input[@aria-describedby="datepicker--screenreader--message--input"])[2]')
+            end.send_keys(Keys.NULL)
+            self.driver.find_element(By.XPATH, f'//div[@aria-roledescription="button"]/div[text()="{self.end_of_week().strftime("%-d")}"]').click()
         self.driver.find_element(By.XPATH, '//button[@data-testid="generate-report-button"]').click()
 
         return f'{self.payments_order_file_name()}'
@@ -791,8 +810,12 @@ class Uber(SeleniumTools):
         self.driver.execute_script("arguments[0].click();", self.driver.find_element(By.XPATH, download_button))
 
     def payments_order_file_name(self):
-        start = self.start_of_week()
-        end = self.end_of_week()
+        if self.day:
+            start = self.start_of_day()
+            end = self.end_of_day()
+        else:
+            start = self.start_of_week()
+            end = self.end_of_week()
         sd, sy, sm = start.strftime("%d"), start.strftime("%Y"), start.strftime("%m")
         ed, ey, em = end.strftime("%d"), end.strftime("%Y"), end.strftime("%m")
         return f'{sy}{sm}{sd}-{ey}{em}{ed}-payments_driver-___.csv'
@@ -992,9 +1015,7 @@ class Bolt(SeleniumTools):
 
     @staticmethod
     def download_weekly_report(week_number=None, day=None,  driver=True, sleep=5, headless=True):
-        """
-                Can save weekly and daily report
-        """
+        """Can save weekly and daily report"""
         b = Bolt(week_number=week_number, day=day, driver=False, sleep=0, headless=headless)
         if b.payments_order_file_name() not in os.listdir(os.curdir):
             b = Bolt(week_number=week_number, day=day, driver=driver, sleep=sleep, headless=headless)
@@ -1007,7 +1028,7 @@ class Bolt(SeleniumTools):
 
 
 class Uklon(SeleniumTools):    
-    def __init__(self, week_number=None, driver=True, sleep=3, headless=False, day=None, base_url="https://partner.uklon.com.ua"):
+    def __init__(self, week_number=None, day=None, driver=True, sleep=3, headless=False, base_url="https://partner.uklon.com.ua"):
         super().__init__('uklon', week_number=week_number, day=day)
         self.sleep = sleep
         if driver:
@@ -1070,12 +1091,6 @@ class Uklon(SeleniumTools):
 
         return items
 
-    def start_of_day(self):
-        return self.day.start_of("day")
-
-    def end_of_day(self):
-        return self.day.end_of("day")
-
     def start_of_day_timestamp(self):
         return round(self.start_of_day().timestamp())
 
@@ -1104,15 +1119,7 @@ class Uklon(SeleniumTools):
 
     @staticmethod
     def download_weekly_report(week_number=None, day=None, driver=True, sleep=5, headless=True):
-        """
-        Can save weekly and daily report
-        :param week_number: str will convert to datetime
-        :param day: str will convert to datetime
-        :param driver:
-        :param sleep:
-        :param headless:
-        :return:
-        """
+        """Can save weekly and daily report"""
         u = Uklon(week_number=week_number, day=day, driver=False, sleep=0, headless=headless)
         if u.payments_order_file_name() not in os.listdir(os.curdir):
             u = Uklon(week_number=week_number, day=day, driver=driver, sleep=sleep, headless=headless)
@@ -1122,6 +1129,7 @@ class Uklon(SeleniumTools):
 
     def status(self):
         pass
+
 
 class NewUklon(SeleniumTools):
     def __init__(self, week_number=None, day=None, driver=True, sleep=3, headless=False, base_url="https://fleets.uklon.com.ua"):
@@ -1190,7 +1198,6 @@ class NewUklon(SeleniumTools):
         actions.click().perform()
         self.driver.find_element(By.XPATH, '//span[text()="Експорт CSV"]').click()
 
-
     def save_report(self):
         if self.sleep:
             time.sleep(self.sleep)
@@ -1227,11 +1234,6 @@ class NewUklon(SeleniumTools):
 
         return items
 
-    def start_of_day(self):
-        return self.day.start_of("day")
-
-    def end_of_day(self):
-        return self.day.end_of("day")
     def start_of_week_timestamp(self):
         return round(self.start_of_week().timestamp())
 
@@ -1269,6 +1271,7 @@ class NewUklon(SeleniumTools):
             u.login()
             u.download_payments_day_order()
         return u.save_report()
+
     def status(self):
         pass
 
