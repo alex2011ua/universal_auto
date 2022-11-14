@@ -15,13 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from app.views import *
 
-from app.views import DriversRatingView
-from app.views import GpsData
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('rating/', DriversRatingView.as_view()),
     path('gps/data', GpsData.as_view()),
     path('fake_uklon/', include('fake_uklon.urls')),
+    path('fake_uber/', include('fake_uber.urls'))
+    path('', include('taxi_service.urls')),
 ]
