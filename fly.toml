@@ -23,7 +23,7 @@ processes = []
   exec = []
 
 [processes]
-  web    =  "bash ./entrypoint.sh"
+  app    =  "bash ./entrypoint.sh"
   worker = "celery -A auto worker --loglevel=info --without-gossip --pool=solo"
   gps    = "python3 manage.py runscript async_gps_server"
   beat   = "celery -A auto beat -l INFO"
@@ -41,7 +41,7 @@ processes = []
     type = "requests"
 
   [[services.ports]]
-    force_https = true
+    force_https = false
     handlers = ["http"]
     port = 80
 
