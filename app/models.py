@@ -396,13 +396,13 @@ class User(models.Model):
     def phone_number_validator(phone_number) -> str:
         if len(phone_number) <= 13:
             if len(phone_number) == 10:
-                valid_phone_number = f'+38{phone_number}'
+                valid_phone_number = f'38{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 12:
-                valid_phone_number = f'+{phone_number}'
+                valid_phone_number = f'{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 11:
-                valid_phone_number = f'+3{phone_number}'
+                valid_phone_number = f'3{phone_number}'
                 return valid_phone_number
         else:
             return None
@@ -415,10 +415,6 @@ class Driver(User):
     OFFLINE = 'Не працюю'
    
     fleet = models.OneToOneField('Fleet', blank=True, null=True, on_delete=models.SET_NULL)
-    #driver_manager_id: ManyToManyField already exists in DriverManager
-    #we have to delete this
-    driver_manager_id = models.ManyToManyField('DriverManager', blank=True)
-    #partner = models.ManyToManyField('Partner', blank=True)
     role = models.CharField(max_length=50, choices=User.Role.choices, default=User.Role.DRIVER)
     driver_status = models.CharField(max_length=35, null=False, default='Offline', verbose_name='Статус водія')
 
@@ -531,7 +527,7 @@ class Client(User):
 
 
 class DriverManager(User):
-    driver_id = models.ManyToManyField(Driver,  blank=True, verbose_name = 'Driver')
+    driver_id = models.ManyToManyField(Driver,  blank=True, verbose_name='Driver')
     role = models.CharField(max_length=50, choices=User.Role.choices, default=User.Role.DRIVER_MANAGER)
 
     class Meta:
