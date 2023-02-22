@@ -346,7 +346,7 @@ def update_data_for_user(update, context):
         update.message.reply_text('Ваша електронна адреса некоректна. Спробуйте ще раз')
 
 
-SERVICEABLE = 'Придатна до обслуговування'
+SERVICEABLE = 'Придатна'
 BROKEN = 'Зламана'
 
 STATE_D = None
