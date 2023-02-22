@@ -4,6 +4,8 @@ import glob
 import os
 import shutil
 import sys
+
+from django.core.validators import RegexValidator
 from django.db import models, IntegrityError
 from django.db.models import Sum, QuerySet
 from django.db.models.base import ModelBase
@@ -394,8 +396,11 @@ class User(models.Model):
 
     @staticmethod
     def phone_number_validator(phone_number) -> str:
-        if len(phone_number) <= 13:
-            if len(phone_number) == 10:
+        pattern = r"^(\+380|380|80|0)+\d{9}$" # just for Ukrainian numbers
+        if re.match(pattern, phone_number) is not None:
+            if len(phone_number) == 13:
+                return phone_number
+            elif len(phone_number) == 10:
                 valid_phone_number = f'+38{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 12:
@@ -1012,11 +1017,11 @@ class Order(models.Model):
     CARD = 'Картка'
     CASH = 'Готівка'
 
-    from_address = models.CharField(max_length=255)
+    from_address = models.CharField(blank=True, max_length=255)
     latitude = models.CharField(max_length=10)
     longitude = models.CharField(max_length=10)
     to_the_address = models.CharField(max_length=255)
-    phone_number = models.CharField(max_length=13)
+    phone_number = models.CharField(blank=True, max_length=13)
     chat_id_client = models.CharField(max_length=15)
     sum = models.CharField(max_length=30)
     payment_method = models.CharField(max_length=70)
@@ -1058,6 +1063,32 @@ class Event(models.Model):
     class Meta:
         verbose_name = 'Подія'
         verbose_name_plural = 'Події'
+
+
+class SubscribeUsers(models.Model):
+    email = models.EmailField(max_length=254, verbose_name='Електрона пошта', blank=True)
+    created_at = models.DateTimeField(editable=False, auto_now=True, verbose_name='Створено')
+
+
+    class Meta:
+        verbose_name = 'Підписник'
+        verbose_name_plural = 'Підписники'
+
+    @staticmethod
+    def get_by_email(email):
+        """
+        Returns subscriber by email
+        :param email: email by which we need to find the subscriber
+        :type email: str
+        :return: subscriber object or None if a subscriber with such email does not exist
+        """
+        try:
+            subscriber = SubscribeUsers.objects.get(email=email)
+            return subscriber
+        except SubscribeUsers.DoesNotExist:
+            return None
+
+
 
 
 from selenium import webdriver
