@@ -374,6 +374,7 @@ def phone_number(update, context):
         update.message.reply_text('Eлектронна адреса некоректна. Спробуйте ще раз')
 
 
+
 def create_user(update, context):
     global STATE_DM
     phone_number = update.message.text
@@ -1042,7 +1043,7 @@ def get_information(update, context):
                 'Для вашої ролі:\n\n' \
                 '/car_status - Показати всі зломлені машини\n' \
                 '/driver_status - Показати водіїв за їх статусом\n' \
-                '/create - Створити користувачів\n' \
+                '/add - Створити користувачів та автомобілі\n' \
                 '/add_vehicle_to_driver - Добавити водію автомобіль\n' \
                 '/option - Взяти вихідний/лікарняний/Сповістити про пошкодження/Записатист до СТО\n'
         update.message.reply_text(f'{report}')
