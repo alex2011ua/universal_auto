@@ -344,7 +344,7 @@ class User(models.Model):
         verbose_name = 'Користувач'
         verbose_name_plural = 'Користувачі'
 
-    def __str__(self)-> str:
+    def __str__(self) -> str:
         return self.full_name()
 
     def full_name(self):
@@ -527,7 +527,7 @@ class Client(User):
 
 
 class DriverManager(User):
-    driver_id = models.ManyToManyField(Driver,  blank=True, verbose_name='Driver')
+    driver_id = models.ManyToManyField(Driver, null=True, blank=True, verbose_name='Driver')
     role = models.CharField(max_length=50, choices=User.Role.choices, default=User.Role.DRIVER_MANAGER)
 
     class Meta:
@@ -649,9 +649,11 @@ class NewUklonFleet(Fleet):
 
 
 class Vehicle(models.Model):
+    ELECTRO = 'Електро'
+
     name = models.CharField(max_length=255, verbose_name='Назва')
     model = models.CharField(max_length=50, verbose_name='Модель')
-    type = models.CharField(max_length=20, verbose_name='Тип')
+    type = models.CharField(max_length=20, default=ELECTRO, verbose_name='Тип')
     licence_plate = models.CharField(max_length=24, unique=True, verbose_name='Номерний знак')
     vin_code = models.CharField(max_length=17)
     gps_imei = models.CharField(max_length=100, default='')
@@ -675,6 +677,34 @@ class Vehicle(models.Model):
             return vehicle
         except Vehicle.DoesNotExist:
             pass
+
+    @staticmethod
+    def name_validator(name):
+        if len(name) <= 255:
+            return name.title()
+        else:
+            return None
+
+    @staticmethod
+    def model_validator(model):
+        if len(model) <= 50:
+            return model.title()
+        else:
+            return None
+
+    @staticmethod
+    def licence_plate_validator(licence_plate):
+        if len(licence_plate) <= 24:
+            return licence_plate.upper()
+        else:
+            return None
+
+    @staticmethod
+    def vin_code_validator(vin_code):
+        if len(vin_code) <= 17:
+            return vin_code.upper()
+        else:
+            return None
 
 
 class Fleets_drivers_vehicles_rate(models.Model):

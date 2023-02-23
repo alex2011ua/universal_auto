@@ -110,7 +110,7 @@ def location(update: Update, context: CallbackContext):
 
 
 STATE = None
-LOCATION, FROM_ADDRESS, TO_THE_ADDRESS, COMMENT, NAME, SECOND_NAME, EMAIL, PHONE_NUMBER = range(1, 9)
+LOCATION, FROM_ADDRESS, TO_THE_ADDRESS, COMMENT = range(1, 5)
 
 
 def the_confirmation_of_location(update, context):
@@ -300,24 +300,35 @@ def get_id(update, context):
 
 
 # Create driver and other
-USER_DRIVER = 'Водія'
+USER_DRIVER, USER_MANAGER_DRIVER = 'Водія', 'Менеджера водія'
+CREATE_USER, CREATE_VEHICLE = 'Добавити користувача', 'Добавити автомобіль'
+
+
+# Add users and vehicle to db and others
+def add(update, context):
+    chat_id = update.message.chat.id
+    driver_manager = DriverManager.get_by_chat_id(chat_id)
+    keyboard = [[KeyboardButton(f'{CREATE_USER}')],
+               [KeyboardButton(f'{CREATE_VEHICLE}')]]
+
+    reply_markup = ReplyKeyboardMarkup(
+        keyboard=[keyboard[0], keyboard[1]],
+        resize_keyboard=True)
+    if driver_manager is not None:
+        context.user_data['role'] = driver_manager
+        update.message.reply_text('Оберіть опцію, що ви бажаєте створити', reply_markup=reply_markup)
+    else:
+        update.message.reply_text("Зареєструйтесь, як менеджер водіїв")
 
 
 def create(update, context):
-    chat_id = update.message.chat.id
-    driver_manager = DriverManager.get_by_chat_id(chat_id)
-
-    keyboard = [KeyboardButton(text=f"{USER_DRIVER}")]
+    keyboard = [[KeyboardButton(text=f"{USER_DRIVER}")],
+                [KeyboardButton(text=f"{USER_MANAGER_DRIVER}")]]
     reply_markup = ReplyKeyboardMarkup(
-        keyboard=[keyboard],
-        resize_keyboard=True,
-    )
+        keyboard=[keyboard[0], keyboard[1]],
+        resize_keyboard=True)
 
-    if driver_manager is not None:
-        context.user_data['role'] = driver_manager
-        update.message.reply_text('Оберіть користувача, якого ви бажаєте створити', reply_markup=reply_markup)
-    else:
-        update.message.reply_text("Зареєструйтесь, як менеджер водіїв")
+    update.message.reply_text('Оберіть користувача, якого ви бажаєте створити', reply_markup=reply_markup)
 
 
 def name(update, context):
@@ -380,7 +391,14 @@ def create_user(update, context):
             manager.driver_id.add(driver.id)
             manager.save()
             update.message.reply_text('Водія було добавленно в базу данних')
+        elif context.user_data['role'] == USER_MANAGER_DRIVER:
+            DriverManager.objects.create(
+                name=context.user_data['name'],
+                second_name=context.user_data['second_name'],
+                email=context.user_data['email'],
+                phone_number=phone_number)
 
+            update.message.reply_text('Менеджера водія було добавленно в базу данних')
         STATE_DM = None
     else:
         update.message.reply_text('Телефонний номер некоректний')
@@ -391,6 +409,7 @@ BROKEN = 'Зламана'
 
 STATE_D = None
 NUMBERPLATE, REPORT = range(1, 3)
+
 
 # Changing status car
 def status_car(update, context):
@@ -409,6 +428,7 @@ def numberplate(update, context):
     context.user_data['status'] = update.message.text
     update.message.reply_text('Введіть номер автомобіля', reply_markup=ReplyKeyboardRemove())
     STATE_D = NUMBERPLATE
+
 
 def change_status_car(update, context):
     global STATE_D
@@ -477,7 +497,9 @@ def broken_car(update, context):
 
 
 STATE_DM = None
-STATUS, DRIVER, CAR_NUMBERPLATE, RATE = range(1, 5)
+NAME, SECOND_NAME, EMAIL, PHONE_NUMBER = range(1, 5)
+STATUS, DRIVER, CAR_NUMBERPLATE, RATE, NAME_VEHICLE, MODEL_VEHICLE, LICENCE_PLATE_VEHICLE, VIN_CODE_VEHICLE = range(5, 13)
+
 
 # Viewing status driver
 def driver_status(update, context):
@@ -556,6 +578,7 @@ def take_a_day_off_or_sick_leave(update, context):
         update.message.reply_text(f'Ваш статус зміненно на <<{Driver.OFFLINE}>> та ваш <<{event[1].title()}>> розпочато',
                                             reply_markup=ReplyKeyboardRemove())
 
+
 # Add Vehicle to driver
 def get_list_drivers(update, context):
     global STATE_DM
@@ -576,6 +599,7 @@ def get_list_drivers(update, context):
             update.message.reply_text('Укажіть номер водія, якому хочете добавити авто.')
     else:
         update.message.reply_text('Зареєструйтесь як менеджер водіїв')
+
 
 def get_list_vehicle(update, context):
     global STATE_DM
@@ -664,12 +688,14 @@ def get_driver_external_id(update, context):
 
         context.user_data['rate'] = drivers_rate
         update.message.reply_text(f"{rate}",  reply_markup=ReplyKeyboardRemove())
-        update.message.reply_text(f"Укажіть номер рейтингу, який ви хочете встановити для {context.user_data['driver']} в автопарку {context.user_data['vehicle']}")
+        update.message.reply_text(f"Укажіть номер рейтингу, який ви хочете встановити для {context.user_data['driver']} в автопарку {context.user_data['fleet']}")
         STATE_DM = RATE
-
-    if isinstance(response, str):
-        update.message.reply_text('Для даного водія вже прикріплене данне авто та автопарк. Спробуйте спочатку')
-        STATE_DM = None
+    try:
+        if isinstance(response, str):
+            update.message.reply_text('Для даного водія вже прикріплене данне авто та автопарк. Спробуйте спочатку')
+            STATE_DM = None
+    except:
+        pass
 
 
 def add_information_to_driver(update, context):
@@ -691,9 +717,67 @@ def add_information_to_driver(update, context):
         update.message.reply_text(f"Ви добавили водію машину та рейтинг в автопарк {context.user_data['fleet']}")
         if context.user_data['driver_external_id'] == 'pass':
             update.message.reply_text(f"Водія {context.user_data['driver']} збереженно зі значенням driver_external_id = \
-{context.user_data['driver_external_id']}. Ви можете його змінити власноруч, через панель адміністратора")
+                        {context.user_data['driver_external_id']}. Ви можете його змінити власноруч, через панель адміністратора")
         STATE_DM = None
 
+
+# Add vehicle to db
+def name_vehicle(update, context):
+    global STATE_DM
+    update.message.reply_text('Введіть назву авто:', reply_markup=ReplyKeyboardRemove())
+    STATE_DM = NAME_VEHICLE
+
+
+def get_name_vehicle(update, context):
+    global STATE_DM
+    name_vehicle = update.message.text
+    name_vehicle = Vehicle.name_validator(name=name_vehicle)
+    if name_vehicle is not None:
+        context.user_data['name_vehicle'] = name_vehicle
+        update.message.reply_text('Введіть модель авто:')
+        STATE_DM = MODEL_VEHICLE
+    else:
+        update.message.reply_text('Назва занадто довга. Спробуйте ще раз')
+
+
+def get_model_vehicle(update, context):
+    global STATE_DM
+    model_vehicle = update.message.text
+    model_vehicle = Vehicle.model_validator(model=model_vehicle)
+    if model_vehicle is not None:
+        context.user_data['model_vehicle'] = model_vehicle
+        update.message.reply_text('Введіть автомобільний номер:')
+        STATE_DM = LICENCE_PLATE_VEHICLE
+    else:
+        update.message.reply_text('Назва занадто довга. Спробуйте ще раз')
+
+
+def get_licence_plate_vehicle(update, context):
+    global STATE_DM
+    licence_plate_vehicle = update.message.text
+    licence_plate_vehicle = Vehicle.licence_plate_validator(licence_plate=licence_plate_vehicle)
+    if licence_plate_vehicle is not None:
+        context.user_data['licence_plate_vehicle'] = licence_plate_vehicle
+        update.message.reply_text('Введіть vin_code для машини (максимальна кількість символів 17)')
+        STATE_DM = VIN_CODE_VEHICLE
+    else:
+        update.message.reply_text('Номерний знак занадто довгий. Спробуйте ще раз')
+
+
+def get_vin_code_vehicle(update, context):
+    global STATE_DM
+    vin_code = update.message.text
+    vin_code = Vehicle.vin_code_validator(vin_code=vin_code)
+    if vin_code is not None:
+        Vehicle.objects.create(
+            name=context.user_data['name_vehicle'],
+            model=context.user_data['model_vehicle'],
+            licence_plate=context.user_data['licence_plate_vehicle'],
+            vin_code=vin_code)
+        update.message.reply_text('Машину додано до бази даних')
+        STATE_DM = None
+    else:
+        update.message.reply_text('Vin code занадто довгий. Спробуйте ще раз')
 
 
 STATE_SSM = None
@@ -806,6 +890,7 @@ CARD, SUM, PORTMONE_SUM, PORTMONE_COMMISSION, GENERATE_LINK = range(1, 6)
 
 TRANSFER_MONEY = 'Перевести кошти'
 GENERATE_LINK = 'Сгенерувати лінк'
+
 
 # Transfer money
 def payments(update, context):
@@ -1027,10 +1112,18 @@ def text(update, context):
             return get_fleet(update, context)
         elif STATE_DM == RATE:
             return add_information_to_driver(update, context)
+        elif STATE_DM == NAME_VEHICLE:
+            return get_name_vehicle(update, context)
+        elif STATE_DM == MODEL_VEHICLE:
+            return get_model_vehicle(update, context)
+        elif STATE_DM == LICENCE_PLATE_VEHICLE:
+            return get_licence_plate_vehicle(update, context)
+        elif STATE_DM == VIN_CODE_VEHICLE:
+            return get_vin_code_vehicle(update, context)
     elif STATE_SSM is not None:
         if STATE_SSM == LICENCE_PLATE:
             return photo(update, context)
-        elif STATE_SSM ==PHOTO:
+        elif STATE_SSM == PHOTO:
             return start_of_repair(update, context)
         elif STATE_SSM == START_OF_REPAIR:
             return end_of_repair(update, context)
@@ -1291,10 +1384,19 @@ def main():
     dp.add_handler(CommandHandler("car_status", broken_car))
     # Viewing status driver
     dp.add_handler(CommandHandler("driver_status", driver_status))
-    # Create driver and other
-    dp.add_handler(CommandHandler("create", create))
+    # Add user and other
+    dp.add_handler(CommandHandler("add", add))
     dp.add_handler(MessageHandler(
-        Filters.text(f'{USER_DRIVER}'), name))
+        Filters.text(f'{CREATE_USER}'),
+        create))
+    # Add vehicle to db
+    dp.add_handler(MessageHandler(
+        Filters.text(f'{CREATE_VEHICLE}'),
+        name_vehicle))
+    dp.add_handler(MessageHandler(
+        Filters.text(f'{USER_DRIVER}') |
+        Filters.text(f'{USER_MANAGER_DRIVER}'),
+        name))
     # Add vehicle to drivers
     dp.add_handler(CommandHandler("add_vehicle_to_driver", get_list_drivers))
     dp.add_handler(MessageHandler(
