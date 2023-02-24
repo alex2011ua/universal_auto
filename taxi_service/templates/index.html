@@ -164,11 +164,7 @@
     </section>
     <!-- end slider section -->
   </div>
-{% if messages %}
-  {% for message in messages %}
-  <center>{{message}}</center>
-  {% endfor %}
-  {% endif %}
+
   <!-- book section -->
 
   <section class="book_section ">
@@ -177,11 +173,18 @@
         <div class="book_form ">
           <form method="post" action="{% url 'new-order' %}">
             {% csrf_token %}
-            {{ order_form.phone_number.errors|striptags }}
-            {{ order_form.from_address.errors|striptags }}
+
 
 
               <div class="form-group col-md-11">
+                {% if messages %}
+       {% for message in messages %}
+              {{ message }}
+       {% endfor %}
+    {% endif %}
+                {% for error in order_form.errors.values %}
+                <p>{{ error|striptags }}<p>
+                {% endfor %}
                 <div class="input-group ">
                   <div class="input-group-prepend">
                     <div class="input-group-text">

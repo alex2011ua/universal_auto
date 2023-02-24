@@ -399,15 +399,15 @@ class User(models.Model):
         pattern = r"^(\+380|380|80|0)+\d{9}$" # just for Ukrainian numbers
         if re.match(pattern, phone_number) is not None:
             if len(phone_number) == 13:
-                return phone_number
+                return phone_number[1:]
             elif len(phone_number) == 10:
-                valid_phone_number = f'+38{phone_number}'
+                valid_phone_number = f'38{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 12:
-                valid_phone_number = f'+{phone_number}'
+                valid_phone_number = f'{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 11:
-                valid_phone_number = f'+3{phone_number}'
+                valid_phone_number = f'3{phone_number}'
                 return valid_phone_number
         else:
             return None

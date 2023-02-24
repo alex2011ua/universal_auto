@@ -30,14 +30,17 @@ class MainOrderForm(ModelForm):
 
 
 class SubscriberForm(ModelForm):
+    email = forms.EmailField(
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter Email'
+        }),
+        error_messages={'invalid': 'Enter correct email'}
+    )
 
     class Meta:
         model = SubscribeUsers
         fields = ('email',)
-
-        widgets = {
-            'email': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Your Email'})
-        }
 
     def clean_email(self):
         email = self.cleaned_data.get('email')

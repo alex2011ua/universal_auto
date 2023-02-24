@@ -1,11 +1,6 @@
 from django.shortcuts import render, HttpResponseRedirect, reverse
 from django.contrib import messages
-from django.urls import reverse_lazy
 
-from django.views.generic import CreateView, FormView
-
-
-from app.models import SubscribeUsers, Order
 from taxi_service.forms import SubscriberForm, MainOrderForm
 
 
@@ -18,13 +13,13 @@ def index(request):
             order_form = MainOrderForm(request.POST)
             if order_form.is_valid():
                 order_form.save()
-                messages.success(request, 'Замовлення прийняте')
+                messages.success(request, 'Order accepted')
                 return HttpResponseRedirect(reverse('index'))
         elif "subscribe_form" in request.POST:
             sub_form = SubscriberForm(request.POST)
             if sub_form.is_valid():
                 sub_form.save()
-                messages.success(request, 'Дякуємо за підписку')
+                messages.success(request, 'Thank you for subscribing')
                 return HttpResponseRedirect(reverse('index'))
 
     context = {
