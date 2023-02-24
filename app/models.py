@@ -735,6 +735,7 @@ class DriverRateLevels(models.Model):
         verbose_name = 'Рівень рейтингу водія'
         verbose_name_plural = 'Рівень рейтингу водіїв'
 
+
 class RawGPS(models.Model):
 
     class Meta:

@@ -508,10 +508,10 @@ def driver_status(update, context):
     chat_id = update.message.chat.id
     driver_manager = DriverManager.get_by_chat_id(chat_id)
     if driver_manager is not None:
-        buttons = [[KeyboardButton(Driver.ACTIVE)],
-                   [KeyboardButton(Driver.WITH_CLIENT)],
-                   [KeyboardButton(Driver.WAIT_FOR_CLIENT)],
-                   [KeyboardButton(Driver.OFFLINE)]
+        buttons = [[KeyboardButton(f'- {Driver.ACTIVE}')],
+                   [KeyboardButton(f'- {Driver.WITH_CLIENT}')],
+                   [KeyboardButton(f'- {Driver.WAIT_FOR_CLIENT}')],
+                   [KeyboardButton(f'- {Driver.OFFLINE}')]
                    ]
         STATE_DM = STATUS
         context.bot.send_message(chat_id=update.effective_chat.id, text='Оберіть статус',
@@ -523,9 +523,10 @@ def driver_status(update, context):
 def viewing_status_driver(update, context):
     global STATE_DM
     status = update.message.text
+    status = status[2:]
     driver = Driver.objects.filter(driver_status=status)
     report = ''
-    result = [f'{i.name} {i.second_name}: {i.fleet}' for i in driver]
+    result = [f'{i.name} {i.second_name}' for i in driver]
     if len(result) == 0:
         update.message.reply_text('Зараз немає водіїв з таким статусом', reply_markup=ReplyKeyboardRemove())
     else:
