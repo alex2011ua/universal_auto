@@ -177,11 +177,11 @@
 
 
               <div class="form-group col-md-11">
-                {% if messages %}
-       {% for message in messages %}
-              {{ message }}
-       {% endfor %}
-    {% endif %}
+                  {% for message in messages %}
+                    {% if "order" in message.tags %}
+                      {{ message }}
+                    {% endif %}
+                  {% endfor %}
                 {% for error in order_form.errors.values %}
                 <p>{{ error|striptags }}<p>
                 {% endfor %}
@@ -501,6 +501,11 @@
               <h4>
                 SIGN UP TO OUR NEWSLETTER
               </h4>
+                  {% for message in messages %}
+                    {% if "subscribe" in message.tags %}
+                      {{ message }}
+                    {% endif %}
+                  {% endfor %}
               <form method="post"  action="{% url 'subscribe' %}">
 
                 {% csrf_token %}

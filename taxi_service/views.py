@@ -13,13 +13,13 @@ def index(request):
             order_form = MainOrderForm(request.POST)
             if order_form.is_valid():
                 order_form.save()
-                messages.success(request, 'Order accepted')
+                messages.success(request, 'Order accepted', extra_tags='order')
                 return HttpResponseRedirect(reverse('index'))
         elif "subscribe_form" in request.POST:
             sub_form = SubscriberForm(request.POST)
             if sub_form.is_valid():
                 sub_form.save()
-                messages.success(request, 'Thank you for subscribing')
+                messages.success(request, 'Thank you for subscribing', extra_tags='subscribe')
                 return HttpResponseRedirect(reverse('index'))
 
     context = {
