@@ -401,13 +401,13 @@ class User(models.Model):
             if len(phone_number) == 13:
                 return phone_number[1:]
             elif len(phone_number) == 10:
-                valid_phone_number = f'38{phone_number}'
+                valid_phone_number = f'+38{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 12:
-                valid_phone_number = f'{phone_number}'
+                valid_phone_number = f'+{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 11:
-                valid_phone_number = f'3{phone_number}'
+                valid_phone_number = f'+3{phone_number}'
                 return valid_phone_number
         else:
             return None
