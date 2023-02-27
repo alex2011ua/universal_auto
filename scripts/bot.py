@@ -41,13 +41,12 @@ def start(update, context):
     user = User.get_by_chat_id(chat_id)
     keyboard = [KeyboardButton(text="\U0001f4f2 Надати номер телефону", request_contact=True),
                 KeyboardButton(text="\U0001f696 Викликати Таксі", request_location=True),
-                KeyboardButton(text="\U0001f465 Надати повну інформацію"),
                 KeyboardButton(text="\U0001f4e2 Залишити відгук")]
     if user:
         user.chat_id = chat_id
         user.save()
         if user.phone_number:
-           keyboard = [keyboard[1], keyboard[2], keyboard[3]]
+           keyboard = [keyboard[1], keyboard[2]]
         reply_markup = ReplyKeyboardMarkup(
           keyboard=[keyboard],
           resize_keyboard=True,
