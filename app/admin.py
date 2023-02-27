@@ -171,7 +171,7 @@ class DriverManagerAdmin(admin.ModelAdmin):
     list_per_page = 25
 
     fieldsets = [
-        (None, {'fields': ['name', 'second_name', 'email', 'phone_number']}),
+        (None, {'fields': ['name', 'second_name', 'email', 'phone_number', 'chat_id']}),
     ]
 
     inlines = [
