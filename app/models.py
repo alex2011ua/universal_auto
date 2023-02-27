@@ -396,13 +396,13 @@ class User(models.Model):
     def phone_number_validator(phone_number) -> str:
         if len(phone_number) <= 13:
             if len(phone_number) == 10:
-                valid_phone_number = f'38{phone_number}'
+                valid_phone_number = f'+38{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 12:
-                valid_phone_number = f'{phone_number}'
+                valid_phone_number = f'+{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 11:
-                valid_phone_number = f'3{phone_number}'
+                valid_phone_number = f'+3{phone_number}'
                 return valid_phone_number
         else:
             return None
@@ -737,16 +737,22 @@ class DriverRateLevels(models.Model):
 
 
 class RawGPS(models.Model):
-
-    class Meta:
-        verbose_name = 'GPS Raw'
-        verbose_name_plural = 'GPS Raw'
-
     imei = models.CharField(max_length=100)
     client_ip = models.CharField(max_length=100)
     client_port = models.IntegerField()
     data = models.CharField(max_length=1024)
     created_at = models.DateTimeField(editable=False, auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'GPS Raw'
+        verbose_name_plural = 'GPS Raw'
+        db_table = 'app_rawgps'
+
+    class LowPriorityMeta:
+        db_table = 'app_rawgps'
+        ordering = ['id']
+        managed = True
+        options = {'priority': 'LOW_PRIORITY'}
 
 
 class GPS(PolymorphicModel):
@@ -765,13 +771,19 @@ class GPS(PolymorphicModel):
 
 
 class VehicleGPS(GPS):
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
+    raw_data = models.OneToOneField(RawGPS, null=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'GPS Vehicle'
         verbose_name_plural = 'GPS Vehicle'
+        db_table = 'app_vehiclegps'
 
-    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
-    raw_data = models.OneToOneField(RawGPS, null=True, on_delete=models.CASCADE)
+    class LowPriorityMeta:
+        db_table = 'app_vehiclegps'
+        ordering = ['id']
+        managed = True
+        options = {'priority': 'LOW_PRIORITY'}
 
 
 class WeeklyReportFile(models.Model):
@@ -1058,6 +1070,7 @@ class Order(models.Model):
             return order
         except Order.DoesNotExist:
             return None
+
 
 class Report_of_driver_debt(models.Model):
     driver = models.CharField(max_length=255, verbose_name='Водій')
@@ -1350,7 +1363,7 @@ class Uber(SeleniumTools):
         el = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.ID, 'forward-button')))
         el.click()
 
-    def login(self, link = "https://auth.uber.com/login/"):
+    def login(self, link="https://auth.uber.com/login/"):
         self.driver.get(link)
         self.login_form('userInput', 'next-button-wrapper', By.CLASS_NAME)
         self.otp_code_v1()
@@ -1585,6 +1598,9 @@ class Uber(SeleniumTools):
         e.click() 
         self.driver.get_screenshot_as_file('UBER_NAME.png')
 
+    def add_driver(self):
+        url = 'https://supplier.uber.com/orgs/49dffc54-e8d9-47bd-a1e5-52ce16241cb6/drivers'
+
     @staticmethod
     def download_weekly_report(week_number=None, driver=True, sleep=5, headless=True):
         u = Uber(week_number=week_number, driver=False, sleep=0, headless=headless)
@@ -1721,6 +1737,25 @@ class Bolt(SeleniumTools):
                 pass
 
         return items
+
+    def add_driver(self):
+        url = 'https://fleets.bolt.eu/company/58225/driver/add'
+        self.driver.get(f"{url}")
+        if self.sleep:
+            time.sleep(self.sleep)
+        form_email = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.ID, 'email')))
+        form_email.click()
+        form_email.clear()
+        form_email.send_keys('igorsivak96@gmail.com')
+        form_phone_number = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.ID, 'phone')))
+        form_phone_number.click()
+        form_phone_number.clear()
+        form_phone_number.send_keys('+380635672343')
+        button = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.ID, 'ember38')))
+        button.click()
+        if self.sleep:
+            time.sleep(self.sleep)
+        self.driver.get_screenshot_as_file('boly_1.png')
 
     @staticmethod
     def download_weekly_report(week_number=None, day=None,  driver=True, sleep=5, headless=True):
