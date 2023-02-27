@@ -746,13 +746,6 @@ class RawGPS(models.Model):
     class Meta:
         verbose_name = 'GPS Raw'
         verbose_name_plural = 'GPS Raw'
-        db_table = 'app_rawgps'
-
-    class LowPriorityMeta:
-        db_table = 'app_rawgps'
-        ordering = ['id']
-        managed = True
-        options = {'priority': 'LOW_PRIORITY'}
 
 
 class GPS(PolymorphicModel):
@@ -777,13 +770,6 @@ class VehicleGPS(GPS):
     class Meta:
         verbose_name = 'GPS Vehicle'
         verbose_name_plural = 'GPS Vehicle'
-        db_table = 'app_vehiclegps'
-
-    class LowPriorityMeta:
-        db_table = 'app_vehiclegps'
-        ordering = ['id']
-        managed = True
-        options = {'priority': 'LOW_PRIORITY'}
 
 
 class WeeklyReportFile(models.Model):
