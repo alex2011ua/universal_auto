@@ -8,6 +8,15 @@ class MainOrderForm(ModelForm):
     class Meta:
         model = Order
         fields = ('from_address', 'phone_number')
+        error_messages = {
+            "from_address": {
+                "required": "Enter your address please",
+            },
+            "phone_number": {
+                "required": "Enter your phone please",
+            },
+        }
+
 
         widgets = {
             'from_address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Pickup Location'}),
@@ -30,12 +39,11 @@ class MainOrderForm(ModelForm):
 
 
 class SubscriberForm(ModelForm):
-    email = forms.EmailField(
-        widget=forms.TextInput(attrs={
+    email = forms.EmailField(widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Enter Email'
+            'placeholder': 'Enter Email',
         }),
-        error_messages={'invalid': 'Enter correct email'}
+        error_messages={'required': 'Enter your email please'}
     )
 
     class Meta:

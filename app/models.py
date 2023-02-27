@@ -1017,11 +1017,11 @@ class Order(models.Model):
     CARD = 'Картка'
     CASH = 'Готівка'
 
-    from_address = models.CharField(blank=True, max_length=255)
+    from_address = models.CharField(max_length=255)
     latitude = models.CharField(max_length=10)
     longitude = models.CharField(max_length=10)
     to_the_address = models.CharField(max_length=255)
-    phone_number = models.CharField(blank=True, max_length=13)
+    phone_number = models.CharField(max_length=13)
     chat_id_client = models.CharField(max_length=15)
     sum = models.CharField(max_length=30)
     payment_method = models.CharField(max_length=70)
@@ -1066,7 +1066,7 @@ class Event(models.Model):
 
 
 class SubscribeUsers(models.Model):
-    email = models.EmailField(max_length=254, verbose_name='Електрона пошта', blank=True)
+    email = models.EmailField(max_length=254, verbose_name='Електрона пошта')
     created_at = models.DateTimeField(editable=False, auto_now=True, verbose_name='Створено')
 
 

@@ -171,20 +171,10 @@
     <div class="container">
       <div class="col-md-11 col=lg-9 mx-auto px-0">
         <div class="book_form ">
-          <form method="post" action="{% url 'new-order' %}">
+          <form method="post" action="{% url 'new-order' %}" novalidate>
             {% csrf_token %}
 
-
-
               <div class="form-group col-md-11">
-                  {% for message in messages %}
-                    {% if "order" in message.tags %}
-                      {{ message }}
-                    {% endif %}
-                  {% endfor %}
-                {% for error in order_form.errors.values %}
-                <p>{{ error|striptags }}<p>
-                {% endfor %}
                 <div class="input-group ">
                   <div class="input-group-prepend">
                     <div class="input-group-text">
@@ -192,6 +182,11 @@
                     </div>
                   </div>
                   {{ order_form.phone_number }}
+                </div>
+
+
+                <div class="input-group pl-2">
+                <p class="text-danger small pl-5">{{ order_form.errors.phone_number|striptags }}</p>
                 </div>
               </div>
 
@@ -204,6 +199,9 @@
                     </div>
                   </div>
                   {{ order_form.from_address }}
+                </div>
+                <div class="input-group pl-2">
+                <p class="text-danger small pl-5">{{ order_form.errors.from_address|striptags }}</p>
                 </div>
               </div>
 
@@ -506,10 +504,13 @@
                       {{ message }}
                     {% endif %}
                   {% endfor %}
-              <form method="post"  action="{% url 'subscribe' %}">
+              <form method="post"  action="{% url 'subscribe' %}" novalidate>
 
                 {% csrf_token %}
-                {{ subscribe_form.as_p }}
+                {{ subscribe_form.email }}
+
+                <p class="text-danger small pl-4">{{ subscribe_form.errors.email|striptags }}</p>
+
 
 
                 <button type="submit" name="subscribe_form">
