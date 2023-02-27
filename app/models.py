@@ -537,7 +537,7 @@ class Client(User):
 
 
 class DriverManager(User):
-    driver_id = models.ManyToManyField(Driver,  blank=True, verbose_name = 'Driver')
+    driver_id = models.ManyToManyField(Driver, null=True, blank=True, verbose_name='Driver')
     role = models.CharField(max_length=50, choices=User.Role.choices, default=User.Role.DRIVER_MANAGER)
 
     class Meta:
@@ -659,6 +659,8 @@ class NewUklonFleet(Fleet):
 
 
 class Vehicle(models.Model):
+    ELECTRO = 'Електро'
+
     name = models.CharField(max_length=255, verbose_name='Назва')
     model = models.CharField(max_length=50, verbose_name='Модель')
     type = models.CharField(max_length=20, default=ELECTRO, verbose_name='Тип')
@@ -1381,7 +1383,7 @@ class Uber(SeleniumTools):
         el = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located((By.ID, 'forward-button')))
         el.click()
 
-    def login(self, link = "https://auth.uber.com/login/"):
+    def login(self, link="https://auth.uber.com/login/"):
         self.driver.get(link)
         self.login_form('userInput', 'next-button-wrapper', By.CLASS_NAME)
         self.otp_code_v1()
