@@ -105,24 +105,24 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'uk-ua'
 
+
 TIME_ZONE = "Europe/Kiev"
 
 USE_I18N = True
 
+USE_L10N = True
+
 USE_TZ = True
 
-STATIC_URL = '/prefix/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 STATIC_ROOT = BASE_DIR / 'data/staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'data/mediafiles'
 
-from django.utils.translation import gettext_lazy as _
-
-LANGUAGES = (
-    ('en', _("English")),
-    ('uk', _("Ukrainian"))
-)
 
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, 'locale/'),
