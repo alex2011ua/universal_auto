@@ -1038,8 +1038,8 @@ class Comment(models.Model):
 
     class Meta:
         verbose_name = 'Відгук'
-        verbose_name_plural='Відгуки'
-        ordering=['-created_at']
+        verbose_name_plural = 'Відгуки'
+        ordering = ['-created_at']
 
 
 class Order(models.Model):
@@ -1065,6 +1065,7 @@ class Order(models.Model):
             return order
         except Order.DoesNotExist:
             return None
+
 
 class Report_of_driver_debt(models.Model):
     driver = models.CharField(max_length=255, verbose_name='Водій')
@@ -1097,7 +1098,6 @@ class Event(models.Model):
 class SubscribeUsers(models.Model):
     email = models.EmailField(max_length=254, verbose_name='Електрона пошта')
     created_at = models.DateTimeField(editable=False, auto_now=True, verbose_name='Створено')
-
 
     class Meta:
         verbose_name = 'Підписник'

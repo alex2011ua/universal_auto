@@ -691,7 +691,7 @@ a:focus {
   width: 100%;
   border: none;
   height: 45px;
-  margin-bottom: 15px;
+  margin-bottom: 0px;
   padding-left: 25px;
   background-color: #eaeaea;
   outline: none;
