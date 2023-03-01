@@ -185,12 +185,8 @@
                 </div>
 
 
-                <div class="input-group pl-2">
-                  {% if order_form.errors %}
+                <div class="input-group pl-3">
                   <p class="text-danger small pl-5">{{ order_form.errors.phone_number|striptags }}</p>
-                  {% else %}
-                  <p class="help small pl-5">{{ order_form.phone_number.help_text|safe }}</p>
-                  {% endif %}
                 </div>
               </div>
 
@@ -204,7 +200,7 @@
                   </div>
                   {{ order_form.from_address }}
                 </div>
-                <div class="input-group pl-2">
+                <div class="input-group pl-3">
                 <p class="text-danger small pl-5">{{ order_form.errors.from_address|striptags }}</p>
                 </div>
               </div>

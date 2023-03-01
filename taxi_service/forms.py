@@ -8,9 +8,6 @@ class MainOrderForm(ModelForm):
     class Meta:
         model = Order
         fields = ('from_address', 'phone_number')
-        help_texts = {
-            'phone_number': 'Enter phone ex.80991234567',
-        }
         error_messages = {
             "from_address": {
                 "required": "Enter your address please",
