@@ -394,8 +394,11 @@ class User(models.Model):
 
     @staticmethod
     def phone_number_validator(phone_number) -> str:
-        if len(phone_number) <= 13:
-            if len(phone_number) == 10:
+        pattern = r"^(\+380|380|80|0)+\d{9}$"
+        if re.match(pattern, phone_number) is not None:
+            if len(phone_number) <= 13:
+                return phone_number
+            elif len(phone_number) == 10:
                 valid_phone_number = f'+38{phone_number}'
                 return valid_phone_number
             elif len(phone_number) == 12:
