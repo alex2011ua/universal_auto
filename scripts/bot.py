@@ -1591,7 +1591,7 @@ def main():
     dp.add_handler(MessageHandler(Filters.text('Update report'), get_update_report))
 
     updater.job_queue.run_daily(auto_report_for_driver_and_owner, time=datetime.time(7, 0, 0), days=(1,))
-    updater.job_queue.run_daily(auto_report_for_driver_and_owner, time=datetime.time(4, 0, 0), days=(1,))
+    updater.job_queue.run_daily(auto_download_report, time=datetime.time(4, 0, 0), days=(1,))
 
     updater.start_polling()
     updater.idle()
