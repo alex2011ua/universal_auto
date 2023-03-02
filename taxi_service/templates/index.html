@@ -29,6 +29,10 @@
   <link href="{% static 'app/css/style.css' %}" rel="stylesheet" />
   <!-- responsive style -->
   <link href="{% static 'app/css/responsive.css' %}" rel="stylesheet" />
+  <script
+  src="https://code.jquery.com/jquery-3.6.3.min.js"
+  integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU="
+  crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -171,7 +175,7 @@
     <div class="container">
       <div class="col-md-11 col=lg-9 mx-auto px-0">
         <div class="book_form ">
-          <form method="post" action="{% url 'new-order' %}" novalidate>
+          <form method="post" id="order-form" action="" novalidate>
             {% csrf_token %}
 
               <div class="form-group col-md-11">
@@ -504,7 +508,7 @@
                       {{ message }}
                     {% endif %}
                   {% endfor %}
-              <form method="post"  action="{% url 'subscribe' %}" novalidate>
+              <form method="post" id="subscribe-form" action="" novalidate>
 
                 {% csrf_token %}
                 {{ subscribe_form.email }}
@@ -545,4 +549,23 @@
 
 </body>
 
+<script>
+  const subscribe-form = document.getElementById('subscribe-form');
+  subscribe-form.addEventListener("submit", submitHandler);
+
+  function submitHandler(e) {
+  e.preventDefault();
+  $.ajax({
+    type: "POST",
+    url: "",
+    data:{
+    email:$('#sub_email').val(),
+    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+    },
+    success: function(){
+    $('#sub_email').val('1'),
+            }
+  })
+  }
+</script>
 </html>

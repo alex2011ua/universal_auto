@@ -1,31 +1,36 @@
-from django.shortcuts import render, HttpResponseRedirect, reverse
-from django.contrib import messages
+from django.http import JsonResponse
+from django.shortcuts import render
+
 
 from taxi_service.forms import SubscriberForm, MainOrderForm
 
 
-def index(request):
-    sub_form = SubscriberForm()
-    order_form = MainOrderForm()
+def is_ajax(request):
+    return request.META.get("HTTP_X_REQUESTED_WITH") == "XMLHttpRequest"
 
-    if request.method == "POST":
+
+def index(request):
+    sub_form = SubscriberForm(prefix='subscriber')
+    order_form = MainOrderForm(prefix='order')
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         if "order_form" in request.POST:
-            order_form = MainOrderForm(request.POST)
+            order_form = MainOrderForm(request.POST, prefix='order')
             if order_form.is_valid():
                 order_form.save()
-                messages.success(request, 'Order accepted', extra_tags='order')
-                return HttpResponseRedirect(reverse('index'))
+                order_form = MainOrderForm(prefix='order')
+
         elif "subscribe_form" in request.POST:
-            sub_form = SubscriberForm(request.POST)
+            sub_form = SubscriberForm(request.POST, prefix='subscriber')
             if sub_form.is_valid():
                 sub_form.save()
-                messages.success(request, 'Thank you for subscribing', extra_tags='subscribe')
-                return HttpResponseRedirect(reverse('index'))
+                sub_form = SubscriberForm(prefix='subscriber')
 
     context = {
         "subscribe_form": sub_form,
         "order_form": order_form,
     }
+
     return render(request, 'index.html', context)
 
 

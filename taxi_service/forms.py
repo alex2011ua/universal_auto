@@ -17,12 +17,11 @@ class MainOrderForm(ModelForm):
             },
         }
 
-
         widgets = {
             'from_address': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Pickup Location', 'style': 'font-size: medium'}),
-            'phone_number': forms.TextInput(attrs={
-                'class': 'form-control', 'placeholder': 'Phone Number', 'style': 'font-size: medium'})
+                'id': 'order-from_address', 'class': 'form-control', 'placeholder': 'Pickup Location', 'style': 'font-size: medium'}),
+            'phone_number': forms.NumberInput(attrs={
+                'id': 'order-phone_number', 'class': 'form-control', 'placeholder': 'Phone Number', 'style': 'font-size: medium'})
         }
 
     def clean_phone_number(self):
@@ -41,10 +40,11 @@ class MainOrderForm(ModelForm):
 
 
 class SubscriberForm(ModelForm):
-    email = forms.EmailField(widget=forms.TextInput(attrs={
+    email = forms.EmailField(widget=forms.EmailInput(attrs={
             'class': 'form-control',
             'placeholder': 'Enter email',
-            'style': 'font-size: medium'
+            'style': 'font-size: medium',
+            'id': 'sub_email'
         }),
         error_messages={'required': 'Enter your email please',
                         'invalid': 'Enter correct email'}

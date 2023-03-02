@@ -325,8 +325,11 @@ progress {
 
 [type="number"]::-webkit-inner-spin-button,
 [type="number"]::-webkit-outer-spin-button {
-  height: auto;
+    -webkit-appearance: none;
+    height: auto;
+    -moz-appearance:textfield;
 }
+
 
 [type="search"] {
   outline-offset: -2px;
@@ -8175,7 +8178,7 @@ button.bg-dark:focus {
 
 .pl-4,
 .px-4 {
-  padding-left: 1.5rem !important;
+  padding-left: 25px !important;
 }
 
 .p-5 {
@@ -8199,7 +8202,7 @@ button.bg-dark:focus {
 
 .pl-5,
 .px-5 {
-  padding-left: 3rem !important;
+  padding-left: 49px !important;
 }
 
 .m-n1 {
