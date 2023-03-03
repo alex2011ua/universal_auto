@@ -1,13 +1,10 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-
-
 from taxi_service.forms import SubscriberForm, MainOrderForm
 
 
-
 def index(request):
-    # sub_form = SubscriberForm()
+    sub_form = SubscriberForm()
     order_form = MainOrderForm()
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         if request.POST.get('action') == 'order':
@@ -17,16 +14,15 @@ def index(request):
             else:
                 return JsonResponse(order_form.errors, status=400)
 
-
-        #
-        # elif request.POST.get('action') == 'subscribe':
-        #     sub_form = SubscriberForm(request.POST, prefix='subscriber')
-        #     if sub_form.is_valid():
-        #         sub_form.save()
-        #         return JsonResponse({'msg': 'Success'})
+        elif request.POST.get('action') == 'subscribe':
+            sub_form = SubscriberForm(request.POST)
+            if sub_form.is_valid():
+                sub_form.save()
+            else:
+                return JsonResponse(sub_form.errors, status=400)
 
     context = {
-        # "subscribe_form": sub_form,
+        "subscribe_form": sub_form,
         "order_form": order_form,
     }
 

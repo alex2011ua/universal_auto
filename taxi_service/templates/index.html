@@ -187,10 +187,7 @@
                   </div>
                   {{ order_form.phone_number }}
                 </div>
-
-
                 <div class="input-group pl-3" id="phone_number-error">
-                  <p class="text-danger small pl-5" id="phone_number-error-message">{{ order_form.errors.phone_number|striptags }}</p>
                 </div>
               </div>
 
@@ -205,7 +202,6 @@
                   {{ order_form.from_address }}
                 </div>
                 <div class="input-group pl-3" id="from_address-error">
-                <p class="text-danger small pl-5" id="from_address-error-message" >{{ order_form.errors.from_address|striptags }}</p>
                 </div>
               </div>
 
@@ -503,12 +499,12 @@
               <h4>
                 SIGN UP TO OUR NEWSLETTER
               </h4>
-              <form method="post" id="subscribe-form" action="" novalidate>
+              <form method="post" id="sub-form" action="" novalidate>
 
                 {% csrf_token %}
                 {{ subscribe_form.email }}
 
-                <p class="text-danger small pl-4">{{ subscribe_form.errors.email|striptags }}</p>
+                <p class="text-danger small pl-4" id="email-error"></p>
 
 
 
@@ -575,5 +571,33 @@ $(document).ready(function(){
   });
 });
 </script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('#sub-form').on('submit', function(event){
+    event.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "{% url 'index' %}",
+      data: {
+        'email': $('#sub_email').val(),
+        'action': 'subscribe',
+        'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+      },
+      success: function(data){
+        $('#email-error').html('');
+        $('#sub-form')[0].reset();
+      },
 
+      error: function(data){
+       $('#email-error').html('');
+        var errors = data.responseJSON;
+        $.each(errors, function(key, value) {
+          $('#' + key + '-error').html(value);
+
+        });
+      }
+    });
+  });
+});
+</script>
 </html>
