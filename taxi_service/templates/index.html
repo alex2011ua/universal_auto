@@ -189,8 +189,8 @@
                 </div>
 
 
-                <div class="input-group pl-3">
-                  <p class="text-danger small pl-5">{{ order_form.errors.phone_number|striptags }}</p>
+                <div class="input-group pl-3" id="phone_number-error">
+                  <p class="text-danger small pl-5" id="phone_number-error-message">{{ order_form.errors.phone_number|striptags }}</p>
                 </div>
               </div>
 
@@ -204,14 +204,14 @@
                   </div>
                   {{ order_form.from_address }}
                 </div>
-                <div class="input-group pl-3">
-                <p class="text-danger small pl-5">{{ order_form.errors.from_address|striptags }}</p>
+                <div class="input-group pl-3" id="from_address-error">
+                <p class="text-danger small pl-5" id="from_address-error-message" >{{ order_form.errors.from_address|striptags }}</p>
                 </div>
               </div>
 
 
             <div class="btn-box">
-              <button type="submit" name="order_form" class="">Замовити зараз</button>
+              <button type="submit" class="">Замовити зараз</button>
             </div>
           </form>
         </div>
@@ -503,11 +503,6 @@
               <h4>
                 SIGN UP TO OUR NEWSLETTER
               </h4>
-                  {% for message in messages %}
-                    {% if "subscribe" in message.tags %}
-                      {{ message }}
-                    {% endif %}
-                  {% endfor %}
               <form method="post" id="subscribe-form" action="" novalidate>
 
                 {% csrf_token %}
@@ -548,24 +543,37 @@
   <script src="{% static 'app/js/custom.js' %}"></script>
 
 </body>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('#order-form').on('submit', function(event){
+    event.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "{% url 'index' %}",
+      data: {
+        'from_address': $('#address').val(),
+        'phone_number': $('#phone').val(),
+        'action': 'order',
+        'csrfmiddlewaretoken': $('input[name="csrfmiddlewaretoken"]').val()
+      },
+      success: function(data){
+        $('#from_address-error').html('');
+        $('#phone_number-error').html('');
+        $('#order-form')[0].reset();
+      },
 
-<script>
-  const subscribe-form = document.getElementById('subscribe-form');
-  subscribe-form.addEventListener("submit", submitHandler);
+      error: function(data){
+       $('#from_address-error').html('');
+       $('#phone_number-error').html('');
+        var errors = data.responseJSON;
+        $.each(errors, function(key, value) {
+          $('#' + key + '-error').html('<p class="text-danger small pl-5">' + value + '</p>');
 
-  function submitHandler(e) {
-  e.preventDefault();
-  $.ajax({
-    type: "POST",
-    url: "",
-    data:{
-    email:$('#sub_email').val(),
-    csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
-    },
-    success: function(){
-    $('#sub_email').val('1'),
-            }
-  })
-  }
+        });
+      }
+    });
+  });
+});
 </script>
+
 </html>

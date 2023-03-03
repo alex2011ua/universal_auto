@@ -19,9 +19,9 @@ class MainOrderForm(ModelForm):
 
         widgets = {
             'from_address': forms.TextInput(attrs={
-                'id': 'order-from_address', 'class': 'form-control', 'placeholder': 'Pickup Location', 'style': 'font-size: medium'}),
+                'id': 'address', 'class': 'form-control', 'placeholder': 'Pickup Location', 'style': 'font-size: medium'}),
             'phone_number': forms.NumberInput(attrs={
-                'id': 'order-phone_number', 'class': 'form-control', 'placeholder': 'Phone Number', 'style': 'font-size: medium'})
+                'id': 'phone', 'class': 'form-control', 'placeholder': 'Phone Number', 'style': 'font-size: medium'})
         }
 
     def clean_phone_number(self):
