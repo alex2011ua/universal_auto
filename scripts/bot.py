@@ -47,11 +47,11 @@ def start(update, context):
         user.chat_id = chat_id
         user.save()
         if user.phone_number:
-           keyboard = [keyboard[1], keyboard[2], keyboard[3]]
-        reply_markup = ReplyKeyboardMarkup(
-          keyboard=[keyboard],
-          resize_keyboard=True,
-        )
+            keyboard = [keyboard[1], keyboard[2], keyboard[3]]
+            reply_markup = ReplyKeyboardMarkup(
+                keyboard=[keyboard],
+                resize_keyboard=True,
+                )
         update.message.reply_text('Зробіть вибір', reply_markup=reply_markup)
     else:
         User.objects.create(
@@ -113,7 +113,7 @@ def location(update: Update, context: CallbackContext):
             time.sleep(5)
 
 
-STATE = None
+STATE = None # range (1-50)
 LOCATION, FROM_ADDRESS, TO_THE_ADDRESS, COMMENT = range(1, 5)
 U_NAME, U_SECOND_NAME, U_EMAIL = range(5, 8)
 
@@ -494,8 +494,8 @@ def create_user(update, context):
 SERVICEABLE = 'Придатна'
 BROKEN = 'Зламана'
 
-STATE_D = None
-NUMBERPLATE, REPORT = range(1, 3)
+STATE_D = None    # range(50 - 100)
+NUMBERPLATE, REPORT = range(50, 52)
 
 
 # Changing status car
@@ -583,10 +583,11 @@ def broken_car(update, context):
         update.message.reply_text('Зареєструйтесь як менеджер водіїв')
 
 
-STATE_DM = None
-NAME, SECOND_NAME, EMAIL, PHONE_NUMBER = range(1, 5)
-STATUS, DRIVER, CAR_NUMBERPLATE, RATE, NAME_VEHICLE, MODEL_VEHICLE, LICENCE_PLATE_VEHICLE, VIN_CODE_VEHICLE = range(5, 13)
-JOB_APPLICATION = range(13, 14)
+STATE_DM = None     # range (100 -150)
+NAME, SECOND_NAME, EMAIL, PHONE_NUMBER = range(100, 104)
+STATUS, DRIVER, CAR_NUMBERPLATE, RATE, NAME_VEHICLE, MODEL_VEHICLE, LICENCE_PLATE_VEHICLE, VIN_CODE_VEHICLE = range(104, 112)
+JOB_APPLICATION = range(112, 113)
+
 
 # Viewing status driver
 def driver_status(update, context):
@@ -675,7 +676,7 @@ def get_list_drivers(update, context):
     if driver_manager is not None:
         drivers = {i.id: f'{i.name } {i.second_name}' for i in Driver.objects.all()}
         if len(drivers) == 0:
-            update.message.reply_text('Кількисть зареєстрованих водіїв 0')
+            update.message.reply_text('Кількість зареєстрованих водіїв 0')
         else:
             drivers_keys = sorted(drivers)
             drivers = {i: drivers[i] for i in drivers_keys}
@@ -920,8 +921,8 @@ def get_vin_code_vehicle(update, context):
         update.message.reply_text('Vin code занадто довгий. Спробуйте ще раз')
 
 
-STATE_SSM = None
-LICENCE_PLATE, PHOTO, START_OF_REPAIR, END_OF_REPAIR = range(1, 5)
+STATE_SSM = None   # range(150-200)
+LICENCE_PLATE, PHOTO, START_OF_REPAIR, END_OF_REPAIR = range(150, 154)
 
 
 # Sending report on repair
@@ -1025,8 +1026,8 @@ def help(update, context) -> str:
                               'Щоб переглянути команди для вашої ролі скористайтесь командою /get_information \n')
 
 
-STATE_O = None
-CARD, SUM, PORTMONE_SUM, PORTMONE_COMMISSION, GENERATE_LINK = range(1, 6)
+STATE_O = None     # range(200-250)
+CARD, SUM, PORTMONE_SUM, PORTMONE_COMMISSION, GENERATE_LINK = range(200, 205)
 
 TRANSFER_MONEY = 'Перевести кошти'
 GENERATE_LINK = 'Сгенерувати лінк'
@@ -1303,7 +1304,7 @@ def report(update, context):
 
     # sending report to owner
     message = f'Fleet Owner: {"%.2f" % owner["Fleet Owner"]}\n\n' + '\n'.join(totals.values())
-    context.bot.send_message(chat_id=DEVELOPER_CHAT_ID, text=message)
+    context.bot.send_message(chat_id=736204274, text=message)
 
     # sending report to driver
     for driver in drivers:
