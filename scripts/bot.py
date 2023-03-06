@@ -52,7 +52,7 @@ def start(update, context):
                 keyboard=[keyboard],
                 resize_keyboard=True,
                 )
-        update.message.reply_text('Зробіть вибір', reply_markup=reply_markup)
+            update.message.reply_text('Зробіть вибір', reply_markup=reply_markup)
     else:
         User.objects.create(
             chat_id=chat_id,
