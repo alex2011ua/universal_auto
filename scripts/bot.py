@@ -355,6 +355,7 @@ def update_user_information(update, context):
         user.save()
         update.message.reply_text('Ваші дані оновлені')
         STATE = None
+        role_for_job_application(update, context)
     else:
         update.message.reply_text('Eлектронна адреса некоректна. Спробуйте ще раз')
 
