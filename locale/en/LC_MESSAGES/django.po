@@ -27,8 +27,8 @@ msgid "Ukrainian"
 msgstr ""
 
 #: taxi_service/templates/index.html:19 taxi_service/templates/index.html:44
-msgid "Універсальне таксі"
-msgstr "Universal taxi"
+msgid "Ninja Taxi"
+msgstr "Ninja Taxi"
 
 #: taxi_service/templates/index.html:53
 msgid "Головна"
