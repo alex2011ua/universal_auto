@@ -250,9 +250,9 @@ class BoltPaymentsOrder(models.Model, metaclass=GenericPaymentsOrder):
 
     def vendor(self):
         return 'bolt'
-    
+
     def kassa(self):
-        return (self.total_cach_less_drivers_amount()) 
+        return (self.total_cach_less_drivers_amount())
 
     def total_owner_amount(self, rate=0.65):
         return self.total_cach_less_drivers_amount() * (1 - rate) - self.total_drivers_amount(rate)
@@ -412,14 +412,14 @@ class User(models.Model):
                 return valid_phone_number
         else:
             return None
-        
-        
+
+
 class Driver(User):
     ACTIVE = 'Готовий прийняти заказ'
     WITH_CLIENT = 'В дорозі'
     WAIT_FOR_CLIENT = 'Очікую клієнта'
     OFFLINE = 'Не працюю'
-   
+
     fleet = models.OneToOneField('Fleet', blank=True, null=True, on_delete=models.SET_NULL)
     #driver_manager_id: ManyToManyField already exists in DriverManager
     #we have to delete this
@@ -818,7 +818,7 @@ class WeeklyReportFile(models.Model):
         return converted_list
 
     def save_weekly_reports_to_db(self):
-        
+
         for file in csv_list:
             rows = []
             try:
