@@ -4,6 +4,17 @@ from app.models import Order, SubscribeUsers, User
 from django.utils.translation import gettext_lazy as _
 
 
+class PhoneInput(forms.NumberInput):
+    input_type = 'tel'
+
+    def build_attrs(self, attrs, extra_attrs=None, **kwargs):
+        attrs = super().build_attrs(attrs, extra_attrs, **kwargs)
+        attrs['pattern'] = r'^[\d+]*$'
+        attrs['onkeypress'] = 'return event.charCode >= 48 && event.charCode <= 57 || event.charCode == 43;'
+        attrs['oninput'] = r"this.value = this.value.replace(/[^0-9+]/g, '');".replace("'", r'"')
+        return attrs
+
+
 class MainOrderForm(ModelForm):
 
     class Meta:
@@ -21,7 +32,7 @@ class MainOrderForm(ModelForm):
         widgets = {
             'from_address': forms.TextInput(attrs={
                 'id': 'address', 'class': 'form-control', 'placeholder': _('Ваша адреса'), 'style': 'font-size: medium'}),
-            'phone_number': forms.NumberInput(attrs={
+            'phone_number': PhoneInput(attrs={
                 'id': 'phone', 'class': 'form-control', 'placeholder': _('Номер телефону'), 'style': 'font-size: medium'})
         }
 

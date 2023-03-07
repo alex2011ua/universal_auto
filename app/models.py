@@ -1119,7 +1119,6 @@ class SubscribeUsers(models.Model):
             return None
 
 
-
 class JobApplication(models.Model):
     first_name = models.CharField(max_length=255, verbose_name='Ім\'я')
     last_name = models.CharField(max_length=255, verbose_name='Прізвище')
