@@ -388,7 +388,7 @@ class User(models.Model):
 
     @staticmethod
     def email_validator(email) -> str:
-        pattern = r"^([a-zA-Z0-9]+\.?)+@([a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,4}$"
+        pattern = r"^([a-zA-Z0-9]+\.?[a-zA-Z0-9]+)+@([a-zA-Z0-9]+\.)+[a-zA-Z0-9]{2,4}$"
         if re.match(pattern, email) is not None:
             return email
         else:
