@@ -55,6 +55,7 @@ msgstr "Enter your email please"
 msgid "Введіть корректну ел.пошту"
 msgstr "Enter correct email"
 
+
 #: taxi_service/forms.py:61
 msgid "Невірний формат"
 msgstr "Wrong format"
@@ -66,8 +67,8 @@ msgstr "You are subscriber already"
 #: taxi_service/templates/about.html:18 taxi_service/templates/about.html:43
 #: taxi_service/templates/index.html:19 taxi_service/templates/index.html:48
 #: taxi_service/templates/why.html:18 taxi_service/templates/why.html:43
-msgid "Універсальне таксі"
-msgstr "Universal taxi"
+msgid "Ninja Taxi"
+msgstr "Ninja Taxi"
 
 #: taxi_service/templates/about.html:52 taxi_service/templates/index.html:57
 #: taxi_service/templates/why.html:52
